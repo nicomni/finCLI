@@ -17,11 +17,11 @@ func (p parser) parse(record []string) (transaction, []error) {
 		index uint32
 		set   func(string)
 	}{
-		{"date", p.lo.date, func(v string) { tx.date = v }},
-		{"payee", p.lo.payee, func(v string) { tx.payee = v }},
-		{"memo", p.lo.memo, func(v string) { tx.memo = v }},
-		{"inflow", p.lo.inflow, func(v string) { tx.inflow = v }},
-		{"outflow", p.lo.outflow, func(v string) { tx.outflow = v }},
+		{"date", p.lo.Date, func(v string) { tx.date = v }},
+		{"payee", p.lo.Payee, func(v string) { tx.payee = v }},
+		{"memo", p.lo.Memo, func(v string) { tx.memo = v }},
+		{"inflow", p.lo.Inflow, func(v string) { tx.inflow = v }},
+		{"outflow", p.lo.Outflow, func(v string) { tx.outflow = v }},
 	}
 
 	for _, f := range fields {

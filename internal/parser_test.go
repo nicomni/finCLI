@@ -21,11 +21,11 @@ func Test_parser(t *testing.T) {
 		{
 			name: "layout 1",
 			layout: layout{
-				date:    1,
-				payee:   2,
-				memo:    3,
-				inflow:  4,
-				outflow: 5,
+				Date:    1,
+				Payee:   2,
+				Memo:    3,
+				Inflow:  4,
+				Outflow: 5,
 			},
 			record: []string{"2025-01-01", "Bob's Store", "stuff", "100.00", ""},
 			want: transaction{
@@ -39,11 +39,11 @@ func Test_parser(t *testing.T) {
 		{
 			name: "layout 2",
 			layout: layout{
-				date:    2,
-				payee:   4,
-				memo:    1,
-				inflow:  3,
-				outflow: 5,
+				Date:    2,
+				Payee:   4,
+				Memo:    1,
+				Inflow:  3,
+				Outflow: 5,
 			},
 			record: []string{"stuff", "2025-01-01", "100.00", "Bob's Store", ""},
 			want: transaction{
@@ -72,11 +72,11 @@ func Test_parser(t *testing.T) {
 
 func Test_parser_layoutWithLargeIndexes(t *testing.T) {
 	lo := layout{
-		date:    1,
-		payee:   2,
-		memo:    6, // index larger than record length
-		inflow:  3,
-		outflow: 7, // index larger than record length
+		Date:    1,
+		Payee:   2,
+		Memo:    6, // index larger than record length
+		Inflow:  3,
+		Outflow: 7, // index larger than record length
 	}
 
 	record := []string{"2025-01-01", "My Employer", "100.00"}
@@ -114,11 +114,11 @@ func Test_parser_layoutWithLargeIndexes(t *testing.T) {
 
 func Test_parser_parsesFromLargeRecord(t *testing.T) {
 	lo := layout{
-		date:    3,
-		payee:   5,
-		memo:    1,
-		inflow:  7,
-		outflow: 2,
+		Date:    3,
+		Payee:   5,
+		Memo:    1,
+		Inflow:  7,
+		Outflow: 2,
 	}
 	record := []string{
 		"foo",         // 1: memo

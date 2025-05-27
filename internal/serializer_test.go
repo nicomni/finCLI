@@ -23,11 +23,11 @@ func Test_serializer_serialize_zeroLayout(t *testing.T) {
 
 func Test_serializer_serialize_customLayout(t *testing.T) {
 	ser := serializer{lo: layout{
-		date:    2,
-		payee:   4,
-		memo:    1,
-		inflow:  3,
-		outflow: 5,
+		Date:    2,
+		Payee:   4,
+		Memo:    1,
+		Inflow:  3,
+		Outflow: 5,
 	}}
 	tx := transaction{
 		date:    "2025-01-01",
@@ -45,11 +45,11 @@ func Test_serializer_serialize_customLayout(t *testing.T) {
 
 func Test_serializer_serialize_layoutWithLargeIndexes(t *testing.T) {
 	ser := serializer{lo: layout{
-		date:    2,
-		payee:   6,
-		memo:    1,
-		inflow:  4,
-		outflow: 8,
+		Date:    2,
+		Payee:   6,
+		Memo:    1,
+		Inflow:  4,
+		Outflow: 8,
 	}}
 	tx := transaction{
 		date:    "2025-01-01",
