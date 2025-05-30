@@ -3,7 +3,11 @@ package txn
 import (
 	"bytes"
 	"embed"
+	"encoding/csv"
+	"errors"
 	"fmt"
+	"io"
+	"io/fs"
 	"path/filepath"
 
 	"github.com/spf13/viper"
@@ -31,11 +35,45 @@ type Transaction struct {
 	Outflow string
 }
 
+func LoadStatement(r io.Reader, layoutId string) ([]Transaction, error) {
+	l, err := GetLayout(layoutId)
+	if err != nil {
+		return nil, err
+	}
+	p := parser{lo: l}
+
+	cr := csv.NewReader(r)
+	cr.Comma = ';'
+	records, err := cr.ReadAll()
+	if err != nil {
+		return nil, fmt.Errorf("could not read bank statement records: %v", err)
+	}
+
+	transactions := make([]Transaction, 0, len(records))
+
+	for idx, rec := range records {
+		if idx == 0 {
+			continue // skip header
+		}
+		t, errs := p.parse(rec)
+		// TODO: Lenient but loud: print warnings and continue
+		if len(errs) != 0 {
+			return nil, fmt.Errorf("parsing record %d: got errors: %v", idx, errs)
+		}
+		transactions = append(transactions, t)
+	}
+
+	return transactions, nil
+}
+
 //go:embed layouts/*
 var layouts embed.FS
 
-func getLayout(name string) (Layout, error) {
+func GetLayout(name string) (Layout, error) {
 	layoutBytes, err := layouts.ReadFile(filepath.Join("layouts", name+".yaml"))
+	if errors.Is(err, fs.ErrNotExist) {
+		return Layout{}, fmt.Errorf("layout '%s' is unknown", name)
+	}
 	if err != nil {
 		return Layout{}, fmt.Errorf("could not read builtin layout: %v", err)
 	}
