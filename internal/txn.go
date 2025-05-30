@@ -23,12 +23,12 @@ type layout struct {
 	Outflow uint32
 }
 
-type transaction struct {
-	date    string
-	payee   string
-	memo    string
-	inflow  string
-	outflow string
+type Transaction struct {
+	Date    string
+	Payee   string
+	Memo    string
+	Inflow  string
+	Outflow string
 }
 
 //go:embed layouts/*

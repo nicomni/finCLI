@@ -7,12 +7,12 @@ import (
 
 func Test_serializer_serialize_zeroLayout(t *testing.T) {
 	ser := serializer{lo: layout{}}
-	tx := transaction{
-		date:    "2025-01-01",
-		payee:   "Bob's Store",
-		memo:    "stuff",
-		inflow:  "100.00",
-		outflow: "50.00",
+	tx := Transaction{
+		Date:    "2025-01-01",
+		Payee:   "Bob's Store",
+		Memo:    "stuff",
+		Inflow:  "100.00",
+		Outflow: "50.00",
 	}
 	got := ser.serialize(tx)
 	want := []string{"", "", "", "", ""}
@@ -29,12 +29,12 @@ func Test_serializer_serialize_customLayout(t *testing.T) {
 		Inflow:  3,
 		Outflow: 5,
 	}}
-	tx := transaction{
-		date:    "2025-01-01",
-		payee:   "Bob's Store",
-		memo:    "stuff",
-		inflow:  "100.00",
-		outflow: "50.00",
+	tx := Transaction{
+		Date:    "2025-01-01",
+		Payee:   "Bob's Store",
+		Memo:    "stuff",
+		Inflow:  "100.00",
+		Outflow: "50.00",
 	}
 	got := ser.serialize(tx)
 	want := []string{"stuff", "2025-01-01", "100.00", "Bob's Store", "50.00"}
@@ -51,12 +51,12 @@ func Test_serializer_serialize_layoutWithLargeIndexes(t *testing.T) {
 		Inflow:  4,
 		Outflow: 8,
 	}}
-	tx := transaction{
-		date:    "2025-01-01",
-		payee:   "Bob's Store",
-		memo:    "stuff",
-		inflow:  "100.00",
-		outflow: "50.00",
+	tx := Transaction{
+		Date:    "2025-01-01",
+		Payee:   "Bob's Store",
+		Memo:    "stuff",
+		Inflow:  "100.00",
+		Outflow: "50.00",
 	}
 	got := ser.serialize(tx)
 	want := []string{"stuff", "2025-01-01", "", "100.00", "", "Bob's Store", "", "50.00"}

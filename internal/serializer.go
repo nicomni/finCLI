@@ -4,7 +4,7 @@ type serializer struct {
 	lo layout
 }
 
-func (s serializer) serialize(tx transaction) []string {
+func (s serializer) serialize(tx Transaction) []string {
 	maxIdx := 5 // default to 5 fields
 	indeces := []uint32{s.lo.Date, s.lo.Payee, s.lo.Memo, s.lo.Inflow, s.lo.Outflow}
 	for _, idx := range indeces {
@@ -18,11 +18,11 @@ func (s serializer) serialize(tx transaction) []string {
 		val   string
 		index uint32
 	}{
-		{tx.date, s.lo.Date},
-		{tx.payee, s.lo.Payee},
-		{tx.memo, s.lo.Memo},
-		{tx.inflow, s.lo.Inflow},
-		{tx.outflow, s.lo.Outflow},
+		{tx.Date, s.lo.Date},
+		{tx.Payee, s.lo.Payee},
+		{tx.Memo, s.lo.Memo},
+		{tx.Inflow, s.lo.Inflow},
+		{tx.Outflow, s.lo.Outflow},
 	}
 	for _, f := range fields {
 		if f.index > 0 {

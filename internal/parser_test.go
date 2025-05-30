@@ -10,13 +10,13 @@ func Test_parser(t *testing.T) {
 		name   string
 		layout layout
 		record []string
-		want   transaction
+		want   Transaction
 	}{
 		{
 			name:   "zero-layout",
 			layout: layout{},
 			record: []string{"2025-01-01", "Bob's Store", "stuff", "100.00", ""},
-			want:   transaction{},
+			want:   Transaction{},
 		},
 		{
 			name: "layout 1",
@@ -28,12 +28,12 @@ func Test_parser(t *testing.T) {
 				Outflow: 5,
 			},
 			record: []string{"2025-01-01", "Bob's Store", "stuff", "100.00", ""},
-			want: transaction{
-				date:    "2025-01-01",
-				payee:   "Bob's Store",
-				memo:    "stuff",
-				inflow:  "100.00",
-				outflow: "",
+			want: Transaction{
+				Date:    "2025-01-01",
+				Payee:   "Bob's Store",
+				Memo:    "stuff",
+				Inflow:  "100.00",
+				Outflow: "",
 			},
 		},
 		{
@@ -46,12 +46,12 @@ func Test_parser(t *testing.T) {
 				Outflow: 5,
 			},
 			record: []string{"stuff", "2025-01-01", "100.00", "Bob's Store", ""},
-			want: transaction{
-				date:    "2025-01-01",
-				payee:   "Bob's Store",
-				memo:    "stuff",
-				inflow:  "100.00",
-				outflow: "",
+			want: Transaction{
+				Date:    "2025-01-01",
+				Payee:   "Bob's Store",
+				Memo:    "stuff",
+				Inflow:  "100.00",
+				Outflow: "",
 			},
 		},
 	}
@@ -80,12 +80,12 @@ func Test_parser_layoutWithLargeIndexes(t *testing.T) {
 	}
 
 	record := []string{"2025-01-01", "My Employer", "100.00"}
-	want := transaction{
-		date:    "2025-01-01",
-		payee:   "My Employer",
-		memo:    "",
-		inflow:  "100.00",
-		outflow: "",
+	want := Transaction{
+		Date:    "2025-01-01",
+		Payee:   "My Employer",
+		Memo:    "",
+		Inflow:  "100.00",
+		Outflow: "",
 	}
 	p := parser{lo: lo}
 	got, errs := p.parse(record)
@@ -130,12 +130,12 @@ func Test_parser_parsesFromLargeRecord(t *testing.T) {
 		"100.00",      // 7: inflow
 		"extra",       // 8: ignored
 	}
-	want := transaction{
-		date:    "2025-01-01",
-		payee:   "Bob's Store",
-		memo:    "foo",
-		inflow:  "100.00",
-		outflow: "bar",
+	want := Transaction{
+		Date:    "2025-01-01",
+		Payee:   "Bob's Store",
+		Memo:    "foo",
+		Inflow:  "100.00",
+		Outflow: "bar",
 	}
 	p := parser{lo}
 	got, errs := p.parse(record)
