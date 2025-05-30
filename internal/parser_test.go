@@ -8,19 +8,19 @@ import (
 func Test_parser(t *testing.T) {
 	tests := []struct {
 		name   string
-		layout layout
+		layout Layout
 		record []string
 		want   Transaction
 	}{
 		{
 			name:   "zero-layout",
-			layout: layout{},
+			layout: Layout{},
 			record: []string{"2025-01-01", "Bob's Store", "stuff", "100.00", ""},
 			want:   Transaction{},
 		},
 		{
 			name: "layout 1",
-			layout: layout{
+			layout: Layout{
 				Date:    1,
 				Payee:   2,
 				Memo:    3,
@@ -38,7 +38,7 @@ func Test_parser(t *testing.T) {
 		},
 		{
 			name: "layout 2",
-			layout: layout{
+			layout: Layout{
 				Date:    2,
 				Payee:   4,
 				Memo:    1,
@@ -71,7 +71,7 @@ func Test_parser(t *testing.T) {
 }
 
 func Test_parser_layoutWithLargeIndexes(t *testing.T) {
-	lo := layout{
+	lo := Layout{
 		Date:    1,
 		Payee:   2,
 		Memo:    6, // index larger than record length
@@ -113,7 +113,7 @@ func Test_parser_layoutWithLargeIndexes(t *testing.T) {
 }
 
 func Test_parser_parsesFromLargeRecord(t *testing.T) {
-	lo := layout{
+	lo := Layout{
 		Date:    3,
 		Payee:   5,
 		Memo:    1,

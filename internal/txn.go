@@ -9,13 +9,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-// layout describes the mapping of transaction field names to their column positions
+// Layout describes the mapping of transaction field names to their column positions
 // in a specific format.
 //
 // Each canonical field name is associated with the index of
 // the column where its value can be found. The index starts at 1. An index of 0
 // indicates that the field is not present in the bank statement.
-type layout struct {
+type Layout struct {
 	Date    uint32
 	Payee   uint32
 	Memo    uint32
@@ -34,10 +34,10 @@ type Transaction struct {
 //go:embed layouts/*
 var layouts embed.FS
 
-func getLayout(name string) (layout, error) {
+func getLayout(name string) (Layout, error) {
 	layoutBytes, err := layouts.ReadFile(filepath.Join("layouts", name+".yaml"))
 	if err != nil {
-		return layout{}, fmt.Errorf("could not read builtin layout: %v", err)
+		return Layout{}, fmt.Errorf("could not read builtin layout: %v", err)
 	}
 	result, err := unmarshalLayout(layoutBytes)
 	if err != nil {
@@ -46,13 +46,13 @@ func getLayout(name string) (layout, error) {
 	return result, nil
 }
 
-func unmarshalLayout(layoutBytes []byte) (layout, error) {
-	var result layout
+func unmarshalLayout(layoutBytes []byte) (Layout, error) {
+	var result Layout
 	v := viper.New()
 	v.SetConfigType("yaml")
 	err := v.ReadConfig(bytes.NewReader(layoutBytes))
 	if err != nil {
-		return layout{}, err
+		return Layout{}, err
 	}
 	// NOTE: Consider better error handling for unknown fields if strict decoding is required
 	err = v.UnmarshalExact(&result)

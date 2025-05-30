@@ -6,7 +6,7 @@ import (
 )
 
 func Test_serializer_serialize_zeroLayout(t *testing.T) {
-	ser := serializer{lo: layout{}}
+	ser := serializer{lo: Layout{}}
 	tx := Transaction{
 		Date:    "2025-01-01",
 		Payee:   "Bob's Store",
@@ -22,7 +22,7 @@ func Test_serializer_serialize_zeroLayout(t *testing.T) {
 }
 
 func Test_serializer_serialize_customLayout(t *testing.T) {
-	ser := serializer{lo: layout{
+	ser := serializer{lo: Layout{
 		Date:    2,
 		Payee:   4,
 		Memo:    1,
@@ -44,7 +44,7 @@ func Test_serializer_serialize_customLayout(t *testing.T) {
 }
 
 func Test_serializer_serialize_layoutWithLargeIndexes(t *testing.T) {
-	ser := serializer{lo: layout{
+	ser := serializer{lo: Layout{
 		Date:    2,
 		Payee:   6,
 		Memo:    1,

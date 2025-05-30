@@ -5,7 +5,7 @@ import (
 )
 
 type parser struct {
-	lo layout
+	lo Layout
 }
 
 func (p parser) parse(record []string) (Transaction, []error) {

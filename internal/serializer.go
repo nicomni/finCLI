@@ -1,7 +1,7 @@
 package txn
 
 type serializer struct {
-	lo layout
+	lo Layout
 }
 
 func (s serializer) serialize(tx Transaction) []string {
