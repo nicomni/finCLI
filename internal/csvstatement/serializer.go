@@ -1,4 +1,4 @@
-package txn
+package csvstatement
 
 type serializer struct {
 	lo Layout
