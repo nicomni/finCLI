@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"reflect"
 	"testing"
-	"txn/internal/csvstatement"
+	"txn/csvstatement"
 )
 
 func TestLoadStatement(t *testing.T) {
