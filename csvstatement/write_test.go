@@ -1,66 +1,49 @@
-package csvstatement
+package csvstatement_test
 
 import (
-	"reflect"
+	"strings"
 	"testing"
+	"time"
+	"txn/csvstatement"
 )
 
-func Test_serializer_serialize_zeroLayout(t *testing.T) {
-	ser := serializer{lo: Layout{}}
-	tx := Transaction{
-		Date:    "2025-01-01",
-		Payee:   "Bob's Store",
-		Memo:    "stuff",
-		Inflow:  "100.00",
-		Outflow: "50.00",
+func Test_WriteToYNAB(t *testing.T) {
+	statement := csvstatement.ParsedStatement{
+		Transactions: []csvstatement.StatementTransaction{
+			{
+				Date:    time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
+				Payee:   "testPayee",
+				Memo:    "testMemo",
+				Inflow:  0,
+				Outflow: 1234,
+			},
+			{
+				Date:    time.Date(2025, 1, 2, 0, 0, 0, 0, time.UTC),
+				Payee:   "testPayee2",
+				Memo:    "testMemo2",
+				Inflow:  50000,
+				Outflow: 0,
+			},
+		},
 	}
-	got := ser.serialize(tx)
-	want := []string{"", "", "", "", ""}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("serializer.serialize() with zero-layout = %v, want %v", got, want)
-	}
-}
 
-func Test_serializer_serialize_customLayout(t *testing.T) {
-	ser := serializer{lo: Layout{
-		Date:    2,
-		Payee:   4,
-		Memo:    1,
-		Inflow:  3,
-		Outflow: 5,
-	}}
-	tx := Transaction{
-		Date:    "2025-01-01",
-		Payee:   "Bob's Store",
-		Memo:    "stuff",
-		Inflow:  "100.00",
-		Outflow: "50.00",
+	format, err := csvstatement.GetFormat("ynab")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
-	got := ser.serialize(tx)
-	want := []string{"stuff", "2025-01-01", "100.00", "Bob's Store", "50.00"}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("serializer.serialize() with custom layout = %v, want %v", got, want)
-	}
-}
 
-func Test_serializer_serialize_layoutWithLargeIndexes(t *testing.T) {
-	ser := serializer{lo: Layout{
-		Date:    2,
-		Payee:   6,
-		Memo:    1,
-		Inflow:  4,
-		Outflow: 8,
-	}}
-	tx := Transaction{
-		Date:    "2025-01-01",
-		Payee:   "Bob's Store",
-		Memo:    "stuff",
-		Inflow:  "100.00",
-		Outflow: "50.00",
+	want := `Date,Payee,Memo,Inflow,Outflow
+2025-01-01,testPayee,testMemo,0.00,12.34
+2025-01-02,testPayee2,testMemo2,500.00,0.00
+`
+
+	w := strings.Builder{}
+	err = csvstatement.WriteStatement(&w, statement, format)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
 	}
-	got := ser.serialize(tx)
-	want := []string{"stuff", "2025-01-01", "", "100.00", "", "Bob's Store", "", "50.00"}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("serializer.serialize() with large indexes = %v, want %v", got, want)
+	result := w.String()
+	if result != want {
+		t.Errorf("Write statement, unexpected output:\ngot:\n%s\nbut wanted:\n%s", result, want)
 	}
 }

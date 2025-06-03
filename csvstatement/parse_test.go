@@ -1,148 +1,93 @@
-package csvstatement
+package csvstatement_test
 
 import (
-	"regexp"
+	"strings"
 	"testing"
+	"time"
+	"txn/csvstatement"
 )
 
-func Test_parser(t *testing.T) {
-	tests := []struct {
-		name   string
-		layout Layout
-		record []string
-		want   Transaction
-	}{
-		{
-			name:   "zero-layout",
-			layout: Layout{},
-			record: []string{"2025-01-01", "Bob's Store", "stuff", "100.00", ""},
-			want:   Transaction{},
-		},
-		{
-			name: "layout 1",
-			layout: Layout{
-				Date:    1,
-				Payee:   2,
-				Memo:    3,
-				Inflow:  4,
-				Outflow: 5,
-			},
-			record: []string{"2025-01-01", "Bob's Store", "stuff", "100.00", ""},
-			want: Transaction{
-				Date:    "2025-01-01",
-				Payee:   "Bob's Store",
-				Memo:    "stuff",
-				Inflow:  "100.00",
-				Outflow: "",
-			},
-		},
-		{
-			name: "layout 2",
-			layout: Layout{
-				Date:    2,
-				Payee:   4,
-				Memo:    1,
-				Inflow:  3,
-				Outflow: 5,
-			},
-			record: []string{"stuff", "2025-01-01", "100.00", "Bob's Store", ""},
-			want: Transaction{
-				Date:    "2025-01-01",
-				Payee:   "Bob's Store",
-				Memo:    "stuff",
-				Inflow:  "100.00",
-				Outflow: "",
-			},
+func TestParser_Basic(t *testing.T) {
+	format := csvstatement.Format{
+		Delimiter: ',',
+		HasHeader: true,
+		ColumnMappings: []csvstatement.TransactionColumn{
+			{Name: "Date", Kind: csvstatement.FieldDate, Pos: 1, DateFormat: "2006-01-02"},
+			{Name: "Payee", Kind: csvstatement.FieldPayee, Pos: 2},
+			{Name: "Memo", Kind: csvstatement.FieldMemo, Pos: 3},
+			{Name: "Inflow", Kind: csvstatement.FieldInflow, Pos: 4},
+			{Name: "Outflow", Kind: csvstatement.FieldOutflow, Pos: 5},
 		},
 	}
+	csvData := `Date, Payee, Memo, Inflow, Outflow
+2025-01-01,Store,Groceries,0.00,12.34
+2025-01-02,Bankomat,Deposit,500.00,0.00`
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := parser{tt.layout}
-			got, errs := p.parse(tt.record)
-			if len(errs) > 0 {
-				t.Fatalf("parseTransaction() failed: %v", errs)
-			}
-			if got != tt.want {
-				t.Errorf("parseTransaction() = %v, want %v", got, tt.want)
-			}
-		})
+	parser := csvstatement.NewParser(format)
+
+	result, err := parser.Parse(strings.NewReader(csvData))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(result.Transactions) != 2 {
+		t.Fatalf("expected 2 transactions, got %d", len(result.Transactions))
+	}
+	tx1 := result.Transactions[0]
+	want := csvstatement.StatementTransaction{
+		Date:    time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC),
+		Payee:   "Store",
+		Memo:    "Groceries",
+		Outflow: 1234,
+	}
+	if tx1 != want {
+		t.Errorf("unexpected tx1: %+v, wanted: %+v", tx1, want)
+	}
+
+	tx2 := result.Transactions[1]
+	want = csvstatement.StatementTransaction{
+		Date:   time.Date(2025, time.January, 2, 0, 0, 0, 0, time.UTC),
+		Payee:  "Bankomat",
+		Memo:   "Deposit",
+		Inflow: 50000,
+	}
+	if tx2 != want {
+		t.Errorf("unexpected tx2: %+v, wanted: %+v", tx1, want)
 	}
 }
 
-func Test_parser_layoutWithLargeIndexes(t *testing.T) {
-	lo := Layout{
-		Date:    1,
-		Payee:   2,
-		Memo:    6, // index larger than record length
-		Inflow:  3,
-		Outflow: 7, // index larger than record length
+func Test_Bulder(t *testing.T) {
+	csvData := `Dato;Inn på konto;Ut fra konto;Til konto;Til kontonummer;Fra konto;Fra kontonummer;Type;Tekst;KID;Hovedkategori;Underkategori
+2025-01-01;;12,34;;;;;;Groceries;;;
+2025-01-02;500,00;;;;;;;Deposit;;;`
+	format, err := csvstatement.GetFormat("bulder")
+	if err != nil {
+		t.Fatal(err)
+	}
+	parser := csvstatement.NewParser(format)
+	got, err := parser.Parse(strings.NewReader(csvData))
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if len(got.Transactions) != 2 {
+		t.Fatalf("expected 2 transactions, got %d", len(got.Transactions))
+	}
+	tx1 := got.Transactions[0]
+	want := csvstatement.StatementTransaction{
+		Date:    time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC),
+		Memo:    "Groceries",
+		Outflow: 1234,
+	}
+	if tx1 != want {
+		t.Errorf("unexpected tx1: %+v, wanted: %+v", tx1, want)
 	}
 
-	record := []string{"2025-01-01", "My Employer", "100.00"}
-	want := Transaction{
-		Date:    "2025-01-01",
-		Payee:   "My Employer",
-		Memo:    "",
-		Inflow:  "100.00",
-		Outflow: "",
+	tx2 := got.Transactions[1]
+	want = csvstatement.StatementTransaction{
+		Date:   time.Date(2025, time.January, 2, 0, 0, 0, 0, time.UTC),
+		Memo:   "Deposit",
+		Inflow: 50000,
 	}
-	p := parser{lo: lo}
-	got, errs := p.parse(record)
-
-	t.Run("parses available fields", func(t *testing.T) {
-		if got != want {
-			t.Errorf("parse() = %v, wnat %v", got, want)
-		}
-	})
-
-	t.Run("returns errors for out-of-range indexes", func(t *testing.T) {
-		if len(errs) != 2 {
-			t.Fatalf("expected 2 errors, got %d: %v", len(errs), errs)
-		}
-	})
-
-	t.Run("error messages are correct", func(t *testing.T) {
-		re := regexp.MustCompile(`^layout index \d+ for field \w+ out of range for record of length \d+$`)
-		for _, err := range errs {
-			if err == nil || !re.MatchString(err.Error()) {
-				t.Errorf("unexpected error message: %v", err)
-			}
-		}
-	})
-}
-
-func Test_parser_parsesFromLargeRecord(t *testing.T) {
-	lo := Layout{
-		Date:    3,
-		Payee:   5,
-		Memo:    1,
-		Inflow:  7,
-		Outflow: 2,
-	}
-	record := []string{
-		"foo",         // 1: memo
-		"bar",         // 2: outflow
-		"2025-01-01",  // 3: date
-		"baz",         // 4: ignored
-		"Bob's Store", // 5: payee
-		"qux",         // 6: ignored
-		"100.00",      // 7: inflow
-		"extra",       // 8: ignored
-	}
-	want := Transaction{
-		Date:    "2025-01-01",
-		Payee:   "Bob's Store",
-		Memo:    "foo",
-		Inflow:  "100.00",
-		Outflow: "bar",
-	}
-	p := parser{lo}
-	got, errs := p.parse(record)
-	if len(errs) > 0 {
-		t.Fatalf("parse() returned errors: %v", errs)
-	}
-	if got != want {
-		t.Errorf("parse() = %v, want %v", got, want)
+	if tx2 != want {
+		t.Errorf("unexpected tx2: %+v, wanted: %+v", tx1, want)
 	}
 }
