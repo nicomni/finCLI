@@ -114,39 +114,44 @@ func (p Parser) parseCsvRecord(record []string) (*StatementTransaction, error) {
 		}
 		switch col.Kind {
 		case FieldDate:
-			date, err := time.Parse(col.DateFormat, value)
+			date, err := time.Parse(p.format.DateFormat, value)
 			if err != nil {
 				return nil, fmt.Errorf("could not parse date in colum '%s' at position '%d': value='%s'. Error: %w", col.Name, col.Pos, value, err)
 			}
 			txn.Date = date
 		case FieldPayee:
-			txn.Payee = value
+			txn.CounterpartName = value
 		case FieldMemo:
-			txn.Memo = value
+			txn.Description = value
 		case FieldInflow:
 			amount, err := strconv.Atoi(normalizeDecimal(value))
 			if err != nil {
 				return nil, fmt.Errorf("could not parse inflow value at column position '%d' with value '%s': %w", col.Pos, value, err)
 			}
-			txn.Inflow = amount
+			txn.Amount += amount
 		case FieldOutflow:
 			amount, err := strconv.Atoi(normalizeDecimal(value))
 			if err != nil {
-				return nil, fmt.Errorf("could not parse inflow value at column position '%d' with value '%s': %w", col.Pos, value, err)
+				return nil, fmt.Errorf("could not parse outflow value at column position '%d' with value '%s': %w", col.Pos, value, err)
 			}
-			txn.Outflow = amount
+			txn.Amount -= amount
 		}
 	}
 
 	return &txn, nil
 }
 
-// normalizeDecimal removes all spaces, commas, and periods from the input
-// string.
+// normalizeDecimal removes all spaces, commas, dots, and sign characters (+/-)
+// from the input string.
 //
 // This is useful for normalizing decimal numbers (with assumed precision 2)
 // from various locales so they can be parsed as integers representing the
 // smallest currency unit (e.g., cents).
 func normalizeDecimal(dirty string) (clean string) {
-	return strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(dirty, " ", ""), ",", ""), ".", "")
+	clean = strings.ReplaceAll(dirty, " ", "")
+	clean = strings.ReplaceAll(clean, ",", "")
+	clean = strings.ReplaceAll(clean, ".", "")
+	clean = strings.ReplaceAll(clean, "+", "")
+	clean = strings.ReplaceAll(clean, "-", "")
+	return clean
 }

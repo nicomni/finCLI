@@ -9,10 +9,12 @@ import (
 //
 // For convenience use [NewFormat] which sets sensible defaults.
 type Format struct {
-	Id             string
-	Delimiter      rune
-	HasHeader      bool
-	ColumnMappings []TransactionColumn
+	Id               string
+	Delimiter        rune
+	HasHeader        bool
+	DateFormat       string
+	DecimalSeparator rune
+	ColumnMappings   []TransactionColumn
 }
 
 // NewFormat returns a Format with HasHeader set to true by default.
@@ -21,10 +23,9 @@ func NewFormat() Format {
 }
 
 type TransactionColumn struct {
-	Name       string
-	Kind       FieldKind
-	Pos        int // Column position, starts at 1 (one). A 0 or negative value means not present.
-	DateFormat string
+	Name string
+	Kind FieldKind
+	Pos  int // Column position, starts at 1 (one). A 0 or negative value means not present.
 }
 
 // FieldKind describes the kind of data in a column
@@ -40,18 +41,20 @@ const (
 
 var formatRegistry = map[string]Format{
 	"bulder": {
-		Id: "bulder", Delimiter: ';', HasHeader: true,
+		Id: "bulder", Delimiter: ';', HasHeader: true, DateFormat: time.DateOnly,
+		DecimalSeparator: ',',
 		ColumnMappings: []TransactionColumn{
-			{Name: "Dato", Kind: FieldDate, Pos: 1, DateFormat: time.DateOnly},
+			{Name: "Dato", Kind: FieldDate, Pos: 1},
 			{Name: "Tekst", Kind: FieldMemo, Pos: 9},
 			{Name: "Inn på konto", Kind: FieldInflow, Pos: 2},
 			{Name: "Ut fra konto", Kind: FieldOutflow, Pos: 3},
 		},
 	},
 	"ynab": {
-		Id: "ynab", Delimiter: ',', HasHeader: true,
+		Id: "ynab", Delimiter: ',', HasHeader: true, DateFormat: time.DateOnly,
+		DecimalSeparator: '.',
 		ColumnMappings: []TransactionColumn{
-			{Name: "Date", Kind: FieldDate, Pos: 1, DateFormat: time.DateOnly},
+			{Name: "Date", Kind: FieldDate, Pos: 1},
 			{Name: "Payee", Kind: FieldPayee, Pos: 2},
 			{Name: "Memo", Kind: FieldMemo, Pos: 3},
 			{Name: "Inflow", Kind: FieldInflow, Pos: 4},

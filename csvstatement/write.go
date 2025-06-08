@@ -19,7 +19,7 @@ func WriteStatement(writer io.Writer, statement ParsedStatement, format Format) 
 		if err := writeRecord(
 			csvwriter,
 			txn,
-			format.ColumnMappings,
+			format,
 		); err != nil {
 			return fmt.Errorf("could not write transaction %d as CSV record: %w", idx, err)
 		}
@@ -38,32 +38,49 @@ func writeHeader(writer *csv.Writer, colmap []TransactionColumn) error {
 func writeRecord(
 	writer *csv.Writer,
 	txn StatementTransaction,
-	colmap []TransactionColumn,
+	format Format,
 ) error {
-	record := make([]string, len(colmap))
-	for _, col := range colmap {
-		var value string
-		switch col.Kind {
-		case FieldDate:
-			value = txn.Date.Format(col.DateFormat)
-		case FieldPayee:
-			value = txn.Payee
-		case FieldMemo:
-			value = txn.Memo
-		case FieldInflow:
-			value = formatAmount(txn.Inflow)
-		case FieldOutflow:
-			value = formatAmount(txn.Outflow)
-		default:
-			panic("unknown format. should never happen")
-		}
-		record[col.Pos-1] = value
+	record, err := constructRecord(txn, format)
+	if err != nil {
+		return err
 	}
 	return writer.Write(record)
 }
 
-func formatAmount(value int) string {
+func constructRecord(txn StatementTransaction, format Format) ([]string, error) {
+	colMap := format.ColumnMappings
+	record := make([]string, len(colMap))
+	for _, col := range colMap {
+		var value string
+		switch col.Kind {
+		case FieldDate:
+			value = txn.Date.Format(format.DateFormat)
+		case FieldPayee:
+			value = txn.CounterpartName
+		case FieldMemo:
+			value = txn.Description
+		case FieldInflow:
+			if txn.Amount > 0 {
+				value = formatAmount(txn.Amount, format)
+			} else {
+				value = formatAmount(0, format)
+			}
+		case FieldOutflow:
+			if txn.Amount < 0 {
+				value = formatAmount(-txn.Amount, format)
+			} else {
+				value = formatAmount(0, format)
+			}
+		default:
+			return nil, fmt.Errorf("could not construct record field: unknown field kind '%s'", col.Kind)
+		}
+		record[col.Pos-1] = value
+	}
+	return record, nil
+}
+
+func formatAmount(value int, format Format) string {
 	major := value / 100
 	minor := value % 100
-	return fmt.Sprintf("%d.%02d", major, minor)
+	return fmt.Sprintf("%d%c%02d", major, format.DecimalSeparator, minor)
 }

@@ -12,15 +12,18 @@ type StatementTransaction struct {
 	// Date is the date and time when the transaction occurred.
 	Date time.Time
 
-	// Payee is the name of the person or entity receiving or sending funds.
-	Payee string
+	// NOTE: Consider adding BookingDate and ValueDate in stead
 
-	// Memo is an optional note or description providing additional details about the transaction.
-	Memo string
+	// CounterpartName is the name of the person or entity receiving or sending funds.
+	CounterpartName string
 
-	// Inflow is the amount of money received, in the smallest currency unit (e.g., cents).
-	Inflow int
+	// Description is an optional note or description providing additional details about the transaction.
+	Description string
 
-	// Outflow is the amount of money spent or withdrawn, in the smallest currency unit (e.g., cents).
-	Outflow int
+	// Amount is the signed amount of the transaction.
+	// The value  is an integer that represents tha smalles currency unit (e.g., cents).
+	Amount int
+
+	// Currency is the ISO4217 code of the currency
+	// Currency string
 }
