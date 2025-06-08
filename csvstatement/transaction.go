@@ -8,7 +8,7 @@ import "time"
 // It contains information about the date, payee, memo, and the amounts
 // involved. Amounts are stored as int64 in the smallest currency unit (e.g.,
 // cents) to ensure precision.
-type StatementTransaction struct {
+type Transaction struct {
 	// Date is the date and time when the transaction occurred.
 	Date time.Time
 

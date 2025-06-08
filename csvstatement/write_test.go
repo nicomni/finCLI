@@ -9,7 +9,7 @@ import (
 
 func Test_Write(t *testing.T) {
 	statement := csvstatement.ParsedStatement{
-		Transactions: []csvstatement.StatementTransaction{
+		Transactions: []csvstatement.Transaction{
 			{
 				Date:            time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
 				CounterpartName: "testPayee",

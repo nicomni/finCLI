@@ -12,7 +12,7 @@ import (
 )
 
 type ParsedStatement struct {
-	Transactions []StatementTransaction
+	Transactions []Transaction
 }
 
 type Parser struct {
@@ -54,7 +54,7 @@ func (p Parser) Parse(source io.Reader) (ParsedStatement, error) {
 
 	p.checkColumnMappings(reader.FieldsPerRecord)
 
-	result.Transactions = make([]StatementTransaction, 0, len(records))
+	result.Transactions = make([]Transaction, 0, len(records))
 
 	for _, rec := range records {
 		txn, err := p.parseCsvRecord(rec)
@@ -98,8 +98,8 @@ func (p *Parser) checkColumnMappings(numOfFields int) {
 	}
 }
 
-func (p Parser) parseCsvRecord(record []string) (*StatementTransaction, error) {
-	var txn StatementTransaction
+func (p Parser) parseCsvRecord(record []string) (*Transaction, error) {
+	var txn Transaction
 	colMap := p.format.ColumnMappings
 	for _, col := range colMap {
 		if col.Pos <= 0 {
