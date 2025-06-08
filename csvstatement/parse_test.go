@@ -1,10 +1,10 @@
 package csvstatement_test
 
 import (
+	"fincli/csvstatement"
 	"strings"
 	"testing"
 	"time"
-	"txn/csvstatement"
 )
 
 func TestParser_Basic(t *testing.T) {

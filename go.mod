@@ -1,4 +1,4 @@
-module txn
+module fincli
 
 go 1.22.4
 
