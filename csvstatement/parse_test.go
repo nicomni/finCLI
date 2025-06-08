@@ -2,6 +2,7 @@ package csvstatement_test
 
 import (
 	"fincli/csvstatement"
+	"fincli/internal"
 	"fmt"
 	"strings"
 	"testing"
@@ -30,7 +31,7 @@ func TestParser_Basic(t *testing.T) {
 		return b.String()
 	})()
 
-	wantTxns := []csvstatement.Transaction{
+	wantTxns := []internal.Transaction{
 		{
 			Date:            time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC),
 			CounterpartName: "Store",
@@ -70,7 +71,7 @@ func Test_Bulder(t *testing.T) {
 		return b.String()
 	})()
 
-	wantTxns := []csvstatement.Transaction{
+	wantTxns := []internal.Transaction{
 		{
 			Date:            time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC),
 			CounterpartName: "",
@@ -105,7 +106,7 @@ func Test_Bulder(t *testing.T) {
 	}
 }
 
-func checkEqual(want, got csvstatement.Transaction) error {
+func checkEqual(want, got internal.Transaction) error {
 	var errs []string
 
 	if got.Date != want.Date {

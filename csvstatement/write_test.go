@@ -2,6 +2,7 @@ package csvstatement_test
 
 import (
 	"fincli/csvstatement"
+	"fincli/internal"
 	"strings"
 	"testing"
 	"time"
@@ -9,7 +10,7 @@ import (
 
 func Test_Write(t *testing.T) {
 	statement := csvstatement.ParsedStatement{
-		Transactions: []csvstatement.Transaction{
+		Transactions: []internal.Transaction{
 			{
 				Date:            time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
 				CounterpartName: "testPayee",

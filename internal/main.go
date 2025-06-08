@@ -1,13 +1,9 @@
-package csvstatement
+package internal
 
 import "time"
 
 // Transaction represents a single financial transaction, such as an entry from
 // a bank statement.
-//
-// It contains information about the date, payee, memo, and the amounts
-// involved. Amounts are stored as int64 in the smallest currency unit (e.g.,
-// cents) to ensure precision.
 type Transaction struct {
 	// Date is the date and time when the transaction occurred.
 	Date time.Time
