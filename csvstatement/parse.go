@@ -33,6 +33,7 @@ func NewParser(format Format) *Parser {
 }
 
 func (p Parser) Parse(source io.Reader) (ParsedStatement, error) {
+	// TODO: Validate that input conforms to format, and is not empty.
 	var result ParsedStatement
 
 	reader := csv.NewReader(source)
