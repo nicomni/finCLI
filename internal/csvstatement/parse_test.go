@@ -1,8 +1,8 @@
 package csvstatement_test
 
 import (
-	"fincli/csvstatement"
 	"fincli/internal"
+	"fincli/internal/csvstatement"
 	"fmt"
 	"strings"
 	"testing"

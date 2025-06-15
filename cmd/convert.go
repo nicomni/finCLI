@@ -4,7 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fincli/csvstatement"
+	"fincli/internal/csvstatement"
 	"fmt"
 	"log/slog"
 	"os"
