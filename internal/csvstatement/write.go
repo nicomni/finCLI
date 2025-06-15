@@ -2,7 +2,7 @@ package csvstatement
 
 import (
 	"encoding/csv"
-	"fincli/internal"
+	"fincli/internal/domain"
 	"fmt"
 	"io"
 )
@@ -38,7 +38,7 @@ func writeHeader(writer *csv.Writer, colmap []TransactionColumn) error {
 
 func writeRecord(
 	writer *csv.Writer,
-	txn internal.Transaction,
+	txn domain.Transaction,
 	format Format,
 ) error {
 	record, err := constructRecord(txn, format)
@@ -48,7 +48,7 @@ func writeRecord(
 	return writer.Write(record)
 }
 
-func constructRecord(txn internal.Transaction, format Format) ([]string, error) {
+func constructRecord(txn domain.Transaction, format Format) ([]string, error) {
 	colMap := format.ColumnMappings
 	record := make([]string, len(colMap))
 	for _, col := range colMap {
