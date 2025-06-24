@@ -73,5 +73,13 @@ func TestNewCmdConvert(t *testing.T) {
 }
 
 func Test_convertRun(t *testing.T) {
-	assert.True(t, false)
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{} // no tests yet
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.True(t, false)
+		})
+	}
 }
