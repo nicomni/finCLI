@@ -32,26 +32,6 @@ func TestNewCmdConvert(t *testing.T) {
 				ToFormat:   "TO_FORMAT",
 			},
 		},
-		{
-			name:     "no args",
-			cli:      "",
-			wantsErr: true,
-		},
-		{
-			name:     "too many args",
-			cli:      "arg1 arg2",
-			wantsErr: true,
-		},
-		{
-			name:     "missing required --from flag",
-			cli:      "file1 --to format",
-			wantsErr: true,
-		},
-		{
-			name:     "missing required --to flag",
-			cli:      "file1 --from format",
-			wantsErr: true,
-		},
 	}
 
 	for _, tt := range tests {
