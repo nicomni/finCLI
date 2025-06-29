@@ -46,7 +46,8 @@ func Test_Write(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			format, err := csvstatement.GetFormat(tt.formatId)
+			registry := csvstatement.NewRegistry(nil)
+			format, err := registry.Get(tt.formatId)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -11,6 +11,7 @@ import (
 
 type ConvertOptions struct {
 	IO       *iostreams.IOStreams
+	Registry *csvstatement.FormatRegistry
 
 	FilePath   string
 	FromFormat string
@@ -53,7 +54,6 @@ func NewCmdConvert(io *iostreams.IOStreams, runF func(*ConvertOptions) error) *c
 	cmd.Flags().StringVar(&opts.ToFormat, "to", "", "Name of output format (required)")
 	cmd.MarkFlagRequired("to")
 
-	cmd.Flags().Bool("auto-suggest", false, "Enable auto suggestion")
 	return cmd
 }
 
@@ -63,20 +63,26 @@ func convertRun(opts *ConvertOptions) error {
 		return fmt.Errorf("failed to open file %s: %v", opts.FilePath, err)
 	}
 	defer file.Close()
-	fromFormat, err := csvstatement.GetFormat(opts.FromFormat)
+
+	regFactory := &csvstatement.Factory{InitRegistry: opts.Registry}
+	formatRegistry := csvstatement.NewRegistry(regFactory)
+
+	fromFormat, err := formatRegistry.Get(opts.FromFormat)
 	if err != nil {
 		return fmt.Errorf("failed to get format '%s': %v", opts.FromFormat, err)
 	}
 
-	toFormat, err := csvstatement.GetFormat(opts.ToFormat)
+	toFormat, err := formatRegistry.Get(opts.ToFormat)
 	if err != nil {
 		msg := fmt.Sprintf("failed to get format '%s': %v", opts.ToFormat, err)
 		return fmt.Errorf(msg)
 	}
+
 	err = csvstatement.Convert(file, os.Stdout, fromFormat, toFormat)
 	if err != nil {
 		msg := fmt.Sprintf("failed to convert bank statement: %v", err)
 		return fmt.Errorf(msg)
 	}
+
 	return nil
 }

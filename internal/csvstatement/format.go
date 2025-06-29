@@ -39,7 +39,20 @@ const (
 	FieldOutflow FieldKind = "outflow"
 )
 
-var formatRegistry = map[string]Format{
+type FormatRegistry map[string]Format
+
+type Factory struct {
+	InitRegistry *FormatRegistry
+}
+
+func NewRegistry(factory *Factory) *FormatRegistry {
+	if factory != nil && factory.InitRegistry != nil {
+		return factory.InitRegistry
+	}
+	return &defaultRegistry
+}
+
+var defaultRegistry = FormatRegistry{
 	"bulder": {
 		Id: "bulder", Delimiter: ';', HasHeader: true, DateFormat: time.DateOnly,
 		DecimalSeparator: ',',
@@ -63,8 +76,8 @@ var formatRegistry = map[string]Format{
 	},
 }
 
-func GetFormat(name string) (Format, error) {
-	format, ok := formatRegistry[name]
+func (r FormatRegistry) Get(name string) (Format, error) {
+	format, ok := r[name]
 	if !ok {
 		return Format{}, fmt.Errorf("format '%s' is unknown", name)
 	}

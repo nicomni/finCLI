@@ -86,7 +86,8 @@ func Test_Bulder(t *testing.T) {
 		},
 	}
 
-	format, err := csvstatement.GetFormat("bulder")
+	registry := csvstatement.NewRegistry(nil)
+	format, err := registry.Get("bulder")
 	if err != nil {
 		t.Fatal(err)
 	}
