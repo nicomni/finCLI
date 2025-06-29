@@ -27,6 +27,7 @@ func NewCmdRoot(io *iostreams.IOStreams) *cobra.Command {
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fincli.yaml)")
 
 	cmd.AddCommand(NewCmdConvert(io, nil))
+	cmd.AddCommand(NewCmdEdit(io, nil))
 
 	return cmd
 }
