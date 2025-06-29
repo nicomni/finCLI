@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fincli/internal/iostreams"
 	"fmt"
 	"os"
 
@@ -16,8 +17,13 @@ const (
 )
 
 func Main() exitCode {
+	io := &iostreams.IOStreams{
+		In:  os.Stdin,
+		Out: os.Stdout,
+		Err: os.Stderr,
+	}
 	cobra.OnInitialize(initConfig)
-	rootCmd := NewCmdRoot()
+	rootCmd := NewCmdRoot(io)
 	err := rootCmd.Execute()
 	if err != nil {
 		fmt.Println(err)

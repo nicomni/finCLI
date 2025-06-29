@@ -2,12 +2,14 @@
 package cmd
 
 import (
+	"fincli/internal/iostreams"
+
 	"github.com/spf13/cobra"
 )
 
 var cfgFile string
 
-func NewCmdRoot() *cobra.Command {
+func NewCmdRoot(io *iostreams.IOStreams) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "fincli",
 		Short: "A brief description of your application",
@@ -24,7 +26,7 @@ func NewCmdRoot() *cobra.Command {
 
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fincli.yaml)")
 
-	cmd.AddCommand(NewCmdConvert(nil))
+	cmd.AddCommand(NewCmdConvert(io, nil))
 
 	return cmd
 }

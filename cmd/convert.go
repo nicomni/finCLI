@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fincli/internal/csvstatement"
+	"fincli/internal/iostreams"
 	"fmt"
 	"os"
 
@@ -9,14 +10,17 @@ import (
 )
 
 type ConvertOptions struct {
-	AutoSuggest bool
-	FilePath    string
-	FromFormat  string
-	ToFormat    string
+	IO       *iostreams.IOStreams
+
+	FilePath   string
+	FromFormat string
+	ToFormat   string
 }
 
-func NewCmdConvert(runF func(*ConvertOptions) error) *cobra.Command {
-	opts := &ConvertOptions{}
+func NewCmdConvert(io *iostreams.IOStreams, runF func(*ConvertOptions) error) *cobra.Command {
+	opts := &ConvertOptions{
+		IO: io,
+	}
 
 	cmd := &cobra.Command{
 		Use:   "convert [filepath]",

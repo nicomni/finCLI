@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"fincli/internal/iostreams"
 	"strings"
 	"testing"
 
@@ -36,8 +37,14 @@ func TestNewCmdConvert(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			io := &iostreams.IOStreams{
+				In:  new(bytes.Buffer),
+				Out: new(bytes.Buffer),
+				Err: new(bytes.Buffer),
+			}
+
 			var opts *ConvertOptions
-			cmd := NewCmdConvert(func(o *ConvertOptions) error {
+			cmd := NewCmdConvert(io, func(o *ConvertOptions) error {
 				opts = o
 				return nil
 			})
