@@ -27,8 +27,9 @@ func Main() exitCode {
 	err := rootCmd.Execute()
 	if err != nil {
 		fmt.Println(err)
+		return exitError
 	}
-	return exitError
+	return exitOK
 }
 
 // initConfig reads in config file and ENV variables if set.
