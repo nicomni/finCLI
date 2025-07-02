@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fincli/internal/csvstatement"
+	"fincli/internal/bankcsv"
 	"fincli/internal/iostreams"
 	"fmt"
 	"os"
@@ -11,7 +11,7 @@ import (
 
 type ConvertOptions struct {
 	IO       *iostreams.IOStreams
-	Registry *csvstatement.FormatRegistry
+	Registry *bankcsv.FormatRegistry
 
 	FilePath   string
 	FromFormat string
@@ -64,8 +64,8 @@ func convertRun(opts *ConvertOptions) error {
 	}
 	defer file.Close()
 
-	regFactory := &csvstatement.Factory{InitRegistry: opts.Registry}
-	formatRegistry := csvstatement.NewRegistry(regFactory)
+	regFactory := &bankcsv.Factory{InitRegistry: opts.Registry}
+	formatRegistry := bankcsv.NewRegistry(regFactory)
 
 	fromFormat, err := formatRegistry.Get(opts.FromFormat)
 	if err != nil {
@@ -78,7 +78,7 @@ func convertRun(opts *ConvertOptions) error {
 		return fmt.Errorf(msg)
 	}
 
-	err = csvstatement.Convert(file, os.Stdout, fromFormat, toFormat)
+	err = bankcsv.Convert(file, os.Stdout, fromFormat, toFormat)
 	if err != nil {
 		msg := fmt.Sprintf("failed to convert bank statement: %v", err)
 		return fmt.Errorf(msg)

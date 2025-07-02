@@ -1,4 +1,4 @@
-package csvstatement
+package bankcsv
 
 import (
 	"encoding/csv"

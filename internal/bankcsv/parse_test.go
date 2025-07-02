@@ -1,7 +1,7 @@
-package csvstatement_test
+package bankcsv_test
 
 import (
-	"fincli/internal/csvstatement"
+	"fincli/internal/bankcsv"
 	"fincli/internal/domain"
 	"fmt"
 	"strings"
@@ -10,16 +10,16 @@ import (
 )
 
 func TestParser_Basic(t *testing.T) {
-	format := csvstatement.Format{
+	format := bankcsv.Format{
 		Delimiter:        ',',
 		DateFormat:       time.DateOnly,
 		DecimalSeparator: '.',
-		ColumnMappings: []csvstatement.TransactionColumn{
-			{Name: "Date", Kind: csvstatement.FieldDate, Pos: 1},
-			{Name: "Payee", Kind: csvstatement.FieldPayee, Pos: 2},
-			{Name: "Memo", Kind: csvstatement.FieldMemo, Pos: 3},
-			{Name: "Inflow", Kind: csvstatement.FieldInflow, Pos: 4},
-			{Name: "Outflow", Kind: csvstatement.FieldOutflow, Pos: 5},
+		ColumnMappings: []bankcsv.TransactionColumn{
+			{Name: "Date", Kind: bankcsv.FieldDate, Pos: 1},
+			{Name: "Payee", Kind: bankcsv.FieldPayee, Pos: 2},
+			{Name: "Memo", Kind: bankcsv.FieldMemo, Pos: 3},
+			{Name: "Inflow", Kind: bankcsv.FieldInflow, Pos: 4},
+			{Name: "Outflow", Kind: bankcsv.FieldOutflow, Pos: 5},
 		},
 	}
 	csvData := (func() string {
@@ -44,7 +44,7 @@ func TestParser_Basic(t *testing.T) {
 			Amount:          50000,
 		},
 	}
-	parser := csvstatement.NewParser(format)
+	parser := bankcsv.NewParser(format)
 
 	result, err := parser.Parse(strings.NewReader(csvData))
 	if err != nil {
@@ -85,12 +85,12 @@ func Test_Bulder(t *testing.T) {
 		},
 	}
 
-	registry := csvstatement.NewRegistry(nil)
+	registry := bankcsv.NewRegistry(nil)
 	format, err := registry.Get("bulder")
 	if err != nil {
 		t.Fatal(err)
 	}
-	parser := csvstatement.NewParser(format)
+	parser := bankcsv.NewParser(format)
 	got, err := parser.Parse(strings.NewReader(csvData))
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)

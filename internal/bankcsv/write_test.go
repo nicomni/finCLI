@@ -1,7 +1,7 @@
-package csvstatement_test
+package bankcsv_test
 
 import (
-	"fincli/internal/csvstatement"
+	"fincli/internal/bankcsv"
 	"fincli/internal/domain"
 	"strings"
 	"testing"
@@ -9,7 +9,7 @@ import (
 )
 
 func Test_Write(t *testing.T) {
-	statement := csvstatement.ParsedStatement{
+	statement := bankcsv.ParsedStatement{
 		Transactions: []domain.Transaction{
 			{
 				Date:            time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -46,14 +46,14 @@ func Test_Write(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			registry := csvstatement.NewRegistry(nil)
+			registry := bankcsv.NewRegistry(nil)
 			format, err := registry.Get(tt.formatId)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			writer := strings.Builder{}
-			err = csvstatement.WriteStatement(&writer, statement, format)
+			err = bankcsv.WriteStatement(&writer, statement, format)
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}
