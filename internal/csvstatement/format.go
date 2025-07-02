@@ -7,19 +7,40 @@ import (
 
 // Format describes the strucutre of a CSV statement file.
 //
-// For convenience use [NewFormat] which sets sensible defaults.
+// As returned by [NewFormat].
 type Format struct {
-	Id               string
 	Delimiter        rune
-	HasHeader        bool
 	DateFormat       string
 	DecimalSeparator rune
 	ColumnMappings   []TransactionColumn
+
+	// If set to true, reading and writing transaction records with this format
+	// will start on the first line of the file.
+	noHeader bool
 }
 
-// NewFormat returns a Format with HasHeader set to true by default.
-func NewFormat() Format {
-	return Format{HasHeader: true}
+// NewFormat creates a new Format with sensible defaults.
+//
+// The default format:
+//   - uses a comma (',') as delimiter
+//   - uses date format "2006-01-02" (time.DateOnly)
+//   - uses a dot ('.') as decimal separator for amounts, e.g. "100.00"
+//   - includes column headers
+//   - does not include any column mappings.
+func NewFormat() *Format {
+	return &Format{
+		Delimiter:        ',',
+		DateFormat:       time.DateOnly,
+		DecimalSeparator: '.',
+	}
+}
+
+func (f *Format) HasHeader() bool {
+	return !f.noHeader
+}
+
+func (f *Format) SetHasHeader(hasHeader bool) {
+	f.noHeader = !hasHeader
 }
 
 type TransactionColumn struct {
@@ -54,7 +75,7 @@ func NewRegistry(factory *Factory) *FormatRegistry {
 
 var defaultRegistry = FormatRegistry{
 	"bulder": {
-		Id: "bulder", Delimiter: ';', HasHeader: true, DateFormat: time.DateOnly,
+		Delimiter: ';', DateFormat: time.DateOnly,
 		DecimalSeparator: ',',
 		ColumnMappings: []TransactionColumn{
 			{Name: "Dato", Kind: FieldDate, Pos: 1},
@@ -64,7 +85,7 @@ var defaultRegistry = FormatRegistry{
 		},
 	},
 	"ynab": {
-		Id: "ynab", Delimiter: ',', HasHeader: true, DateFormat: time.DateOnly,
+		Delimiter: ',', DateFormat: time.DateOnly,
 		DecimalSeparator: '.',
 		ColumnMappings: []TransactionColumn{
 			{Name: "Date", Kind: FieldDate, Pos: 1},

@@ -12,7 +12,6 @@ import (
 func TestParser_Basic(t *testing.T) {
 	format := csvstatement.Format{
 		Delimiter:        ',',
-		HasHeader:        true,
 		DateFormat:       time.DateOnly,
 		DecimalSeparator: '.',
 		ColumnMappings: []csvstatement.TransactionColumn{

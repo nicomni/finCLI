@@ -10,7 +10,7 @@ import (
 func WriteStatement(writer io.Writer, statement ParsedStatement, format Format) error {
 	csvwriter := csv.NewWriter(writer)
 	defer csvwriter.Flush()
-	if format.HasHeader {
+	if format.HasHeader() {
 		if err := writeHeader(csvwriter, format.ColumnMappings); err != nil {
 			return fmt.Errorf("could not write CSV header: %w", err)
 		}

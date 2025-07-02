@@ -41,7 +41,7 @@ func (p Parser) Parse(source io.Reader) (ParsedStatement, error) {
 		reader.Comma = p.format.Delimiter
 	}
 
-	if p.format.HasHeader {
+	if p.format.HasHeader() {
 		// TEST: Without header
 		_, err := reader.Read()
 		if err != nil {

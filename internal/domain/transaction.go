@@ -8,8 +8,6 @@ type Transaction struct {
 	// Date is the date and time when the transaction occurred.
 	Date time.Time
 
-	// NOTE: Consider adding BookingDate and ValueDate in stead
-
 	// CounterpartName is the name of the person or entity receiving or sending funds.
 	CounterpartName string
 
