@@ -1,25 +1,27 @@
-package bankcsv_test
+package bankcsv
 
 import (
-	"fincli/internal/bankcsv"
 	"fincli/internal/domain"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParser_Basic(t *testing.T) {
-	format := bankcsv.Format{
+	format := Format{
 		Delimiter:        ',',
 		DateFormat:       time.DateOnly,
 		DecimalSeparator: '.',
-		ColumnMappings: []bankcsv.TransactionColumn{
-			{Name: "Date", Kind: bankcsv.FieldDate, Pos: 1},
-			{Name: "Payee", Kind: bankcsv.FieldPayee, Pos: 2},
-			{Name: "Memo", Kind: bankcsv.FieldMemo, Pos: 3},
-			{Name: "Inflow", Kind: bankcsv.FieldInflow, Pos: 4},
-			{Name: "Outflow", Kind: bankcsv.FieldOutflow, Pos: 5},
+		ColumnMappings: []TransactionColumn{
+			{Name: "Date", Kind: FieldDate, Pos: 1},
+			{Name: "Payee", Kind: FieldPayee, Pos: 2},
+			{Name: "Memo", Kind: FieldMemo, Pos: 3},
+			{Name: "Inflow", Kind: FieldInflow, Pos: 4},
+			{Name: "Outflow", Kind: FieldOutflow, Pos: 5},
 		},
 	}
 	csvData := (func() string {
@@ -44,7 +46,7 @@ func TestParser_Basic(t *testing.T) {
 			Amount:          50000,
 		},
 	}
-	parser := bankcsv.NewParser(format)
+	parser := NewParser(&format)
 
 	result, err := parser.Parse(strings.NewReader(csvData))
 	if err != nil {
@@ -85,12 +87,12 @@ func Test_Bulder(t *testing.T) {
 		},
 	}
 
-	registry := bankcsv.NewRegistry(nil)
+	registry := NewRegistry(nil)
 	format, err := registry.Get("bulder")
 	if err != nil {
 		t.Fatal(err)
 	}
-	parser := bankcsv.NewParser(format)
+	parser := NewParser(&format)
 	got, err := parser.Parse(strings.NewReader(csvData))
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -129,4 +131,55 @@ func checkEqual(want, got domain.Transaction) error {
 		return fmt.Errorf("Unexpected transaction field values:\n%s", strings.Join(errs, "\n"))
 	}
 	return nil
+}
+
+func TestParser_parseCsvRecord(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for receiver constructor.
+		format Format
+		// Named input parameters for target function.
+		record  []string
+		want    CSVTransaction // expected result
+		wantErr bool
+	}{
+		{
+			name: "basic valid record",
+			format: Format{
+				DateFormat:       time.DateOnly, // "2006-01-02"
+				DecimalSeparator: '.',
+				ColumnMappings: []TransactionColumn{
+					{Name: "Date", Kind: FieldDate, Pos: 1},
+					{Name: "Counterpart", Kind: FieldPayee, Pos: 2},
+					{Name: "Description", Kind: FieldMemo, Pos: 3},
+					{Name: "Amount", Kind: FieldAmount, Pos: 4},
+				},
+			},
+			record: []string{"2025-01-01", "Store", "Groceries", "-10.00"},
+			want: CSVTransaction{
+				Transaction: domain.Transaction{
+					Date:            time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC),
+					CounterpartName: "Store",
+					Description:     "Groceries",
+					Amount:          -1000, // Amount is in minor units (e.g., cents for EUR)
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := NewParser(&tt.format)
+			got, gotErr := p.parseCsvRecord(tt.record)
+			assert := assert.New(t)
+			require := require.New(t)
+			if tt.wantErr {
+				assert.Error(gotErr)
+				return
+			}
+			require.NoError(gotErr)
+			require.NotNil(got)
+			require.Equal(tt.want.Transaction, got.Transaction)
+			require.Equal(&tt.format, got.Format)
+		})
+	}
 }

@@ -56,6 +56,7 @@ const (
 	FieldDate    FieldKind = "date"
 	FieldPayee   FieldKind = "payee"
 	FieldMemo    FieldKind = "memo"
+	FieldAmount  FieldKind = "amount"
 	FieldInflow  FieldKind = "inflow"
 	FieldOutflow FieldKind = "outflow"
 )

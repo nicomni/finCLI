@@ -3,7 +3,7 @@ package bankcsv
 import "io"
 
 func Convert(source io.Reader, target io.Writer, sourceFormat, targetFormat Format) error {
-	p := NewParser(sourceFormat)
+	p := NewParser(&sourceFormat)
 	stmt, err := p.Parse(source)
 	if err != nil {
 		return err

@@ -12,16 +12,18 @@ import (
 	"time"
 )
 
-type ParsedStatement struct {
+type CSVStatement struct {
 	Transactions []domain.Transaction
+
+	format *Format
 }
 
 type Parser struct {
 	log    slog.Logger
-	format Format
+	format *Format
 }
 
-func NewParser(format Format) *Parser {
+func NewParser(format *Format) *Parser {
 	var parser Parser
 	parser.log = *slog.Default()
 
@@ -32,9 +34,9 @@ func NewParser(format Format) *Parser {
 	return &parser
 }
 
-func (p Parser) Parse(source io.Reader) (ParsedStatement, error) {
+func (p Parser) Parse(source io.Reader) (*CSVStatement, error) {
 	// TODO: Validate that input conforms to format, and is not empty.
-	var result ParsedStatement
+	result := new(CSVStatement)
 
 	reader := csv.NewReader(source)
 	if p.format.Delimiter != 0 {
@@ -45,13 +47,13 @@ func (p Parser) Parse(source io.Reader) (ParsedStatement, error) {
 		// TEST: Without header
 		_, err := reader.Read()
 		if err != nil {
-			return ParsedStatement{}, fmt.Errorf("parsing statement: could not read header. Error: %w", err)
+			return nil, fmt.Errorf("parsing statement: could not read header. Error: %w", err)
 		}
 	}
 
 	records, err := reader.ReadAll()
 	if err != nil {
-		return result, fmt.Errorf("could not read records. Error: %w", err)
+		return nil, fmt.Errorf("could not read records. Error: %w", err)
 	}
 
 	p.checkColumnMappings(reader.FieldsPerRecord)
@@ -59,11 +61,11 @@ func (p Parser) Parse(source io.Reader) (ParsedStatement, error) {
 	result.Transactions = make([]domain.Transaction, 0, len(records))
 
 	for _, rec := range records {
-		txn, err := p.parseCsvRecord(rec)
+		csvTxn, err := p.parseCsvRecord(rec)
 		if err != nil {
-			return ParsedStatement{}, err
+			return nil, err
 		}
-		result.Transactions = append(result.Transactions, *txn)
+		result.Transactions = append(result.Transactions, csvTxn.Transaction)
 	}
 
 	return result, nil
@@ -100,7 +102,7 @@ func (p *Parser) checkColumnMappings(numOfFields int) {
 	}
 }
 
-func (p Parser) parseCsvRecord(record []string) (*domain.Transaction, error) {
+func (p Parser) parseCsvRecord(record []string) (*CSVTransaction, error) {
 	var txn domain.Transaction
 	colMap := p.format.ColumnMappings
 	for _, col := range colMap {
@@ -130,30 +132,48 @@ func (p Parser) parseCsvRecord(record []string) (*domain.Transaction, error) {
 			if err != nil {
 				return nil, fmt.Errorf("could not parse inflow value at column position '%d' with value '%s': %w", col.Pos, value, err)
 			}
-			txn.Amount += amount
+			txn.Amount += abs(amount)
 		case FieldOutflow:
 			amount, err := strconv.Atoi(normalizeDecimal(value))
 			if err != nil {
 				return nil, fmt.Errorf("could not parse outflow value at column position '%d' with value '%s': %w", col.Pos, value, err)
 			}
-			txn.Amount -= amount
+			txn.Amount -= abs(amount)
+		case FieldAmount:
+			amount, err := strconv.Atoi(normalizeDecimal(value))
+			if err != nil {
+				return nil, fmt.Errorf("could not parse amount value at column position '%d' with value '%s': %w", col.Pos, value, err)
+			}
+			txn.Amount = amount
+		default:
+			return nil, fmt.Errorf("could not parse record: unknown field kind '%s' in column '%s'", col.Kind, col.Name)
 		}
 	}
+	csvTxn := new(CSVTransaction)
+	csvTxn.Transaction = txn
+	csvTxn.Format = p.format
 
-	return &txn, nil
+	return csvTxn, nil
 }
 
-// normalizeDecimal removes all spaces, commas, dots, and sign characters (+/-)
-// from the input string.
+// normalizeDecimal removes all spaces, commas, dots, and redundant sign
+// character (+) from the input string.
 //
-// This is useful for normalizing decimal numbers (with assumed precision 2)
+// This is useful for normalizing decimal numbers (assuming precision 2)
 // from various locales so they can be parsed as integers representing the
 // smallest currency unit (e.g., cents).
 func normalizeDecimal(dirty string) (clean string) {
+	// HACK: Breaks the program if input does not have a precision of 2.
 	clean = strings.ReplaceAll(dirty, " ", "")
 	clean = strings.ReplaceAll(clean, ",", "")
 	clean = strings.ReplaceAll(clean, ".", "")
 	clean = strings.ReplaceAll(clean, "+", "")
-	clean = strings.ReplaceAll(clean, "-", "")
 	return clean
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }

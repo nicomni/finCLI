@@ -9,7 +9,7 @@ import (
 )
 
 func Test_Write(t *testing.T) {
-	statement := bankcsv.ParsedStatement{
+	statement := bankcsv.CSVStatement{
 		Transactions: []domain.Transaction{
 			{
 				Date:            time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -53,7 +53,7 @@ func Test_Write(t *testing.T) {
 			}
 
 			writer := strings.Builder{}
-			err = bankcsv.WriteStatement(&writer, statement, format)
+			err = bankcsv.WriteStatement(&writer, &statement, format)
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 			}

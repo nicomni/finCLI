@@ -7,7 +7,7 @@ import (
 	"io"
 )
 
-func WriteStatement(writer io.Writer, statement ParsedStatement, format Format) error {
+func WriteStatement(writer io.Writer, statement *CSVStatement, format Format) error {
 	csvwriter := csv.NewWriter(writer)
 	defer csvwriter.Flush()
 	if format.HasHeader() {
